@@ -21,6 +21,17 @@ class PostCreate(PostBase):
     pass
 
 
+
+"""We used in Response"""  
+class UserOut(BaseModel):
+    id: int
+    email: EmailStr
+    created_at: datetime
+    
+    class Config:
+        orm_mode = True
+
+
 """We used in Response(create_post, update_post, search_post)"""
 class Post(PostBase):
     id: int
@@ -45,16 +56,6 @@ class PostOut(BaseModel):
 class UserCreate(BaseModel):
     email: EmailStr
     password: str = Field(min_length=8, max_length=72) #This is used to validate the password field. It is used to ensure that the password is at least 8 characters long and at most 72 characters long. It is used to prevent weak passwords and ensure that the password is strong enough to protect the user's account.   
- 
-    
-"""We used in Response"""  
-class UserOut(BaseModel):
-    id: int
-    email: EmailStr
-    created_at: datetime
-    
-    class Config:
-        orm_mode = True
         
         
 """We used in Request"""
