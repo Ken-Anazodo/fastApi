@@ -8,8 +8,9 @@ on: [ push, pull_request ] # this section defines the events that trigger the wo
 
 jobs: # this is where we define the jobs that will be executed in the workflow. A workflow can have one or more jobs and they can run in parallel or sequentially.
   job1:
-    environment: 
+    environment: # environment is a feature in github actions that allows you to define a environment that the job will run in. It is used to group together settings, secrets, and other configurations that are needed for the job to run. It also provides a way to control access to the environment and to manage the deployment process. In this case, we have defined an environment named testing. 
       name: testing
+
     env:
       DATABASE_HOST: ${{secrets.DATABASE_HOST}}
       DATABASE_NAME: ${{secrets.DATABASE_NAME}}
@@ -19,7 +20,25 @@ jobs: # this is where we define the jobs that will be executed in the workflow. 
       SECRET_KEY: ${{secrets.SECRET_KEY}}
       ALGORITHM: ${{secrets.ALGORITHM}}
       ACCESS_TOKEN_EXPIRE_MINUTES: ${{secrets.ACCESS_TOKEN_EXPIRE_MINUTES}}
+
+    services: # Service containers to run with `job1`
+      postgres: # Label used to access the service container
+        image: postgres  # Docker Hub image
+        env:
+          POSTGRES_PASSWORD: ${{secrets.DATABASE_PASSWORD}} # Provide the password for postgres
+          POSTGRES_DB: ${{secrets.DATABASE_NAME}}_test # Create a database named fastapi_test
+        ports:
+          # Maps tcp port 5432 to the host
+          - 5432:5432
+        # Set health checks to wait until postgres has started
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
     runs-on: ubuntu-latest #this specifies the operating system that the workflow will run on in the machine provided by github action(CI/CD tool). In this case, it's Ubuntu latest version.
+    
     steps: #this is where we give the specific command or instructions for the workflow to execute. every name with uses or run is a step
       - name: pulling git repository code #this is the name of the step that tells us what the command or instruction is about
         uses: actions/checkout@v7 #this is the actual command that needs to run on our machine and in our case runs in our machine to pull the repo. Theres a github market place of prebuilt actions to use to perform tasks. we're making use of checkout@v2 in our case which is responsible for pulling our code from github market.
