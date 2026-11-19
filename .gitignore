@@ -1,3 +1,5 @@
 fvenv/
 .env
 __pycache__
+gunicorn.service
+nginx.txt

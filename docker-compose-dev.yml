@@ -1,0 +1,37 @@
+version: '3'
+services: #service are the containers that will be run in the docker-compose file. Each service is a container that will be run in the docker-compose file.
+  api: # a container that will run the FastAPI application. The name of the container is api.
+    build: .
+    depends_on: #This is used to specify the dependencies between the services. It means that the api service will wait for the postgres service to be up and running before it starts. This is important because the FastAPI application needs to connect to the PostgreSQL database before it can start. This tells docker i want you to start the postgres container before the api container starts.
+      - postgres
+    ports:
+      - "8000:8000" # this is the port mapping. The first port is the port on the host machine and the second port is the port on the container. So when we access localhost:8000 on the host machine, it will be forwarded to port 8000 on the container where the FastAPI application is running.
+    volumes:
+      - ./:/usr/src/app:ro # this is a volume mapping. we make use of a volume called bind mount, it allows us to sync a folder on our host machine with a folder in the container. The first path is the path on the host machine and the second path is the path on the container. So when we make changes to the code on the host machine, it will be reflected in the container where the FastAPI application is running. The :ro means that the volume is read-only, it adds extra security. This is important because we don't want to make changes to the code in the container. We want to make changes to the code on the host machine and have it reflected in the container.
+    command: uvicorn app.main:app --host 0.0.0. --port 8000 --reload
+    # env_file: #this is an alternative way to load environment variables from a file instead of defining them directly like the below.
+    #   - ./.env
+    environment:
+      - DATABASE_HOST=postgres #it is changed from localhost to postgres because the name of the service or container below is named postgres and we are using docker-compose to run the containers. when we use docker-compose it creates a custom network (docker network) and it uses DNS, we can use the name of the container as the host name as it resolves to the IP address of the container instead of using or looking for the IP address directly to reach postgres database container.
+      - DATABASE_NAME=fastapi
+      - DATABASE_USERNAME=postgres
+      - DATABASE_PASSWORD=password123
+      - DATABASE_PORT=5432
+      - SECRET_KEY=09d25e094faa6ca2556c818166b7a9563b93f7099f6f0f4caa6cf63b88e8d3e7
+      - ALGORITHM=HS256
+      - ACCESS_TOKEN_EXPIRE_MINUTES=30
+
+  postgres: # a container that will run the PostgreSQL database. The name of the container is postgres.
+    image: postgres:18
+    environment:
+        - POSTGRES_PASSWORD=password123 #
+        - POSTGRES_DB=fastapi
+    
+    volumes: #this is a named volume. it allows us to save data from our container to the host machine or local machine. This is useful because if we stop or remove the container, the data will still be available in the named volume. The data will be persisted even if the container is stopped, killed or removed. The data will be stored in the /var/lib/postgresql directory inside the container. so when you spin up a new container its pointed to the same volume and the data will be available to the new container.
+      - postgres-db:/var/lib/postgresql  #this is a named volume that will be created by Docker and will be used to store the data of the PostgreSQL database. postgres_db is the name we chose to name the volume, it can be anything.
+
+volumes: #we register the name of the volume postgres-db globally anytime we use a named volume to persist the data in the database (meaning other containers can have access to it). 
+  postgres-db:
+
+
+

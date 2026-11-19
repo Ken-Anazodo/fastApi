@@ -12,7 +12,7 @@ from ..database import get_db
 """USING SQLALCHEMY ORM TO INTERACT WITH THE DATABASE"""
 #=========================================================================================================================================================================================================
 router = APIRouter(
-    prefix="/posts", #This is used to prefix all the routes in this router with /posts. it's the same as saying /posts
+    prefix="/posts", #This is used to prefix all the routes in this router with /posts. it's the same as saying /posts. so for each post route with @router decorator, before reading the endpoints there, /posts comes before it.
     tags= ["Posts"] #This is used to group all the routes in this router under the Posts tag in the documentation.
 )
 
@@ -46,10 +46,10 @@ def create_post(post: PostCreate, db: Session = Depends(get_db), current_user: i
     # new_post = models.Post(title=post.title, content=post.content, published=post.published) #This creates a new instance of the Post model with the data received in the request body. It uses the PostCreate schema to validate and verify the data received in the request body.
     print(current_user.id)
     print(current_user.email)
-    new_post = models.Post(owner_id = current_user.id, **post.dict()) #It uses the PostCreate schema to validate and verify the data received in the request body. it uses the ** operator to unpack the dictionary returned by the post.dict() method and pass it as keyword arguments to the Post model constructor. so even if we add more fields(column) to the PostCreate schema, we don't have to change the code here, it will automatically unpack the dictionary and pass it as keyword arguments to the Post model constructor. it is the same as writing new_post = models.Post(title=post.title, content=post.content, published=post.published) but it is more flexible and scalable. it is a better way to create a new instance of the Post model with the data received inthe request body. we add the user_id seperatly because the user doesn't send the user_id as payload, since the user must be logged in to create a post, we get the user_id from the token using get_current_user and then send it to the database along with the user input from the payload 
-    db.add(new_post) #This adds the new post tothe database session. It addsthe new post tothe database session but does not commit it yet.
-    db.commit() #This commitsthe changes tothe database and savesthe new post tothe database.
-    db.refresh(new_post) #This retrievesthe new post created and stored inthe database and stores it inthe new_post variable.
+    new_post = models.Post(owner_id = current_user.id, **post.dict()) #It uses the PostCreate schema to validate and verify the data received in the request body. it uses the ** operator to unpack or spread the dictionary returned by the post.dict() method and pass it as keyword arguments to the Post model constructor. so even if we add more fields(column) to the PostCreate schema, we don't have to change the code here, it will automatically unpack or spread the dictionary and pass it as keyword arguments to the Post model constructor. it is the same as writing new_post = models.Post(title=post.title, content=post.content, published=post.published) but it is more flexible and scalable. it is a better way to create a new instance of the Post model with the data received inthe request body. we add the user_id seperatly because the user doesn't send the user_id as payload, since the user must be logged in to create a post, we get the user_id from the token using get_current_user and then send it to the database along with the user input from the payload 
+    db.add(new_post) #This adds the new post to the database session. It adds the new post to the database session but does not commit it yet.
+    db.commit() #This commits the changes to the database and saves the new post to the database.
+    db.refresh(new_post) #This retrieves the new post created and stored in the database and stores it in the new_post variable.
     return new_post
 
 
@@ -58,7 +58,7 @@ def create_post(post: PostCreate, db: Session = Depends(get_db), current_user: i
 def get_post(id:int, db: Session = Depends(get_db), current_user: int = Depends(oauth2.get_current_user)): 
     # post = db.query(models.Post).filter(models.Post.id == id).first() #This is used to query the database and get the post with the given Id from the posts table. It queries the Post model and gets the post with the given Id from the database. It uses the filter method to filter the posts based on the given Id and returns the first post that matches the filter criteria. If no post is found, it returns None.
     post = db.query(models.Post, func.count(models.Vote.post_id).label("votes")).join(models.Vote, models.Vote.post_id == models.Post.id, isouter=True).group_by(models.Post.id).filter(models.Post.id == id).first() #It returns a tuple. This is used to query the database and get the post with the given Id from the posts table along with the number of votes for that post. It queries the Post model and gets the post with the given Id from the database. It uses the join method to join the Vote model with the Post model on the post_id column. It uses the group_by method to group the results by the post_id column. It uses the func.count method to count the number of votes for that post. It uses the label method to label the count as "votes". It uses isouter=True to perform a left outer join, which means that it will return all posts even if they have no votes.
-    
+    print(post)
     if not post:
         print(f"The post with {id} as Id does not exist")
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"The post with {id} as Id does not exist")

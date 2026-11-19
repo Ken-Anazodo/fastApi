@@ -1,0 +1,17 @@
+name: Build and Deploy Code #this is the name of the workflow
+
+on: [ push, pull_request ] # this section defines the events that trigger the workflow or code to run. In this case, the workflow is triggered on push and pull request events to the main branch. we use the below when we want to run the workflow on multiple branches. we can specify the branches that the workflow will run on when there is a push or pull request event. 
+  # push:
+  #   branches: [ main, another_branch ] #it specifies the branches that the workflow will run on when there is a push event. This means that whenever code is pushed to any of the listed branches under push, the workflow will be triggered and the defined jobs will be executed. in yml a list can be defined with square brackets [] or with a dash "-" followed by the branch name each listed and indented on a new line. In this case, the workflow will run on the main branch when there is a push event.
+  # pull_request:
+  #   branches: [ main, another_branch ]
+
+jobs: # this is where we define the jobs that will be executed in the workflow. A workflow can have one or more jobs and they can run in parallel or sequentially.
+  job1:
+    runs-on: ubuntu-latest #this specifies the operating system that the workflow will run on in the machine provided by github action(CI/CD tool). In this case, it's Ubuntu latest version.
+    steps: #this is where we give the specific command or instructions for the workflow to execute.
+      - name: pulling git repository code #this is the name of the step that tells us what the command or instruction is about
+        uses: actions/checkout@v7 #this is the actual command that needs to run on our machine and in our case runs in our machine to pull the repo. Theres a github market place of prebuilt actions to use to perform tasks. we're making use of checkout@v2 in our case which is responsible for pulling our code from github market.
+      - name: say hi to Ken 
+        run: echo "Hi Ken" # we use to run keyword to run any command in our linux machine eg if we wanted to install a package we can do :- run: sudo apt install <name of package>
+         
