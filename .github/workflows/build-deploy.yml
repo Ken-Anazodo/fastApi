@@ -20,4 +20,8 @@ jobs: # this is where we define the jobs that will be executed in the workflow. 
         run: python -m pip install --upgrade pip # we use to run keyword to run any command in our linux machine eg if we wanted to install a package we can do :- run: sudo apt install <name of package>
       - name: install dependencies
         run: pip install -r requirements.txt
+      - name: run tests with pytest
+        run: | # we use the pipe symbol to run multiple commands in the same step
+          pip install pytest
+          pytest
      
