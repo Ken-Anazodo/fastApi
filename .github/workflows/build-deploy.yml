@@ -67,8 +67,8 @@ jobs: # this is where we define the jobs that will be executed in the workflow. 
       - name: Build and push
         uses: docker/build-push-action@v7
         with:
-          context: ./
-          dockerfile: ./Dockerfile
+          # context: ./
+          # dockerfile: ./Dockerfile
           push: true
           tags: ${{ secrets.DOCKER_HUB_NAME }}/fastapi:latest
           cache-from: type=gha
