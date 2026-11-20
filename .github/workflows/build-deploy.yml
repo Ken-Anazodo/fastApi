@@ -70,6 +70,6 @@ jobs: # this is where we define the jobs that will be executed in the workflow. 
           # context: ./
           # dockerfile: ./Dockerfile
           push: true
-          tags: ${{ secrets.DOCKER_HUB_NAME }}/fastapi:latest
+          tags: ${{ secrets.DOCKER_HUB_USERNAME }}/fastapi:latest
           cache-from: type=gha
           cache-to: type=gha,mode=max
