@@ -7,7 +7,7 @@ on: [ push, pull_request ] # this section defines the events that trigger the wo
   #   branches: [ main, another_branch ]
 
 jobs: # this is where we define the jobs that will be executed in the workflow. A workflow can have one or more jobs and they can run in parallel or sequentially.
-  build:
+  build: #the name we gave the job.
     environment: # environment is a feature in github actions that allows you to define a environment that the job will run in. It is used to group together settings, secrets, and other configurations that are needed for the job to run. It also provides a way to control access to the environment and to manage the deployment process. In this case, we have defined an environment named testing. 
       name: testing
 
@@ -76,23 +76,36 @@ jobs: # this is where we define the jobs that will be executed in the workflow. 
       #     cache-from: type=gha
       #     cache-to: type=gha,mode=max
 
-  deploy:
+  deploy: #this job deploys the code to production environment to heroku and ubuntu server
     runs-on: ubuntu-latest #this specifies the operating system that the workflow will run on in the machine provided by github action(CI/CD tool). In this case, it's Ubuntu latest version.
     needs: [build] #we tell the workflow that deploy job needs to wait for the build job to complete before it runs. "needs" is used to define the list of jobs that needs to complete before deploy (job) runs.    
-
+    environment:
+      name: production
     steps:
-    - name: deploy to server
-      # uses: actions/checkout@v7
-      run: echo "deploying some stuff to the server"
+    - name: pulling git repository code #this is the name of the step that tells us what the command or instruction is about
+      uses: actions/checkout@v7
 
-    # - name: deploy code to server
-    #   uses: appleboy/ssh-action@v0.1.5
+    - name: deploy to ubuntu server
+      uses: appleboy/ssh-action@v1
+      with:
+        host: ${{ secrets.PROD_HOST }} #create environment secret in your repository in github with your ubuntu virtual machine details.
+        username: ${{ secrets.PROD_USERNAME }}
+        password: ${{ secrets.PROD_PASSWORD }}
+        script: |
+          cd app/src
+          git pull 
+          sudo systemctl restart api
+
+    # - name: deploy to Heroku
+    # - uses: akhileshns/heroku-deploy@v3.15.15 # This is the action
     #   with:
-    #     host: ${{ secrets.HOST }}
-    #     username: ${{ secrets.USERNAME }}
-    #     key: ${{ secrets.PRIVATE_KEY }}
-    #     script: |
-    #       cd /home/ubuntu/fastapi
-    #       git pull origin main
-    #       sudo docker-compose down
-    #       sudo docker-compose up -d
+    #     heroku_api_key: ${{secrets.HEROKU_API_KEY}} #create environment secret in your repository in github with the value from your heroku acct.
+    #     heroku_app_name: ${{ secrets.HEROKU_APP_NAME }}
+    #     heroku_email: ${{ secrets.HEROKU_EMAIL }}
+
+
+  
+    
+
+
+
